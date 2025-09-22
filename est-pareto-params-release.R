@@ -368,9 +368,9 @@ for(curpyrome in 1:npyromes)
       plot(years_unique, shapelist[[curpyrome]], xlab  = "Year", ylab = "est-shape", ylim = c(0, 2))
       
       abline(h = fsim_shape, col = "red")
-      abline(h = mean_boot, col = "blue")
-      abline(h = mean_boot + 1.96*se_boot, col = "blue", lty = 2)
-      abline(h = mean_boot - 1.96*se_boot, col = "blue", lty = 2)
+      abline(h = mean_boot_hist, col = "blue")
+      abline(h = mean_boot_hist + 1.96*se_boot_hist, col = "blue", lty = 2)
+      abline(h = mean_boot_hist - 1.96*se_boot_hist, col = "blue", lty = 2)
       
       dev.off()
     }
@@ -407,5 +407,4 @@ points(ci_mat_hist[,2], ci_mat_sim[,2], col = "red")
 outmat <- cbind(ci_mat_hist, ci_mat_sim)
 names(outmat) <- c("Hist-L", "Hist-U", "Sim-L", "Sim_U")
 write.table(outmat, "CI-Hist-Sim.csv")
-
 
