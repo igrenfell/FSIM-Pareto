@@ -159,7 +159,7 @@ pyrome_crs <- crs(pyrome_shp)
 v <- vect("Pyromes_CONUS_20200206.shp")
 
 v_crs <- crs(v)
-v_p4s <- proj4string(v_crs)
+#v_p4s <- proj4string(v_crs)
 coords.latlong <- cbind(mytable$LONGITUDE,mytable$LATITUDE)
 coords.sp <- SpatialPoints(coords.latlong)
 P4S.latlon <- CRS("+proj=longlat +datum=WGS84")
@@ -329,12 +329,9 @@ for(curpyrome in 1:npyromes)
       ci_list_hist[[curpyrome]] <- c(alpha_lower_hist, alpha_upper_hist)
       ci_list_sim[[curpyrome]] <- c(alpha_lower_sim, alpha_upper_sim)
       
-      slope_fit_mean  <- -(mean_boot+1)
-      slope_fit_upper <- -(mean_boot + 1.96*se_boot + 1)
-      slope_fit_lower <- -(mean_boot - 1.96*se_boot + 1)
-      int_mean <- my - slope_fit_mean *mx
-      int_upper <- my - slope_fit_upper *mx
-      int_lower <- my - slope_fit_lower *mx
+      slope_fit_mean  <- -(mean_boot_hist+1)
+      slope_fit_upper <- -(mean_boot_hist + 1.96*se_boot_hist + 1)
+      slope_fit_lower <- -(mean_boot_hist - 1.96*se_boot_hist + 1)
       
       h_sim <- hist(fsim_acres, breaks = breaks, plot = FALSE)
       ###K-L divergence of densities
@@ -348,9 +345,9 @@ for(curpyrome in 1:npyromes)
       
       fsim_slope <- -(fsim_shape + 1)
       
-      int_mean <- log(mean_boot) + mean_boot * log(tempmin_fsim) - log(1 - (tempmin_fsim / tempmax)^mean_boot)
-      int_upper <- log(alpha_upper) + alpha_upper * log(tempmin_fsim) - log(1 - (tempmin_fsim / tempmax)^alpha_upper)
-      int_lower <- log(alpha_lower) + alpha_lower * log(tempmin_fsim) - log(1 - (tempmin_fsim / tempmax)^alpha_lower)
+      int_mean_hist <- log(mean_boot_hist) + mean_boot_hist * log(tempmin_fsim) - log(1 - (tempmin_fsim / tempmax)^mean_boot_hist)
+      int_upper_hist <- log(alpha_upper_hist) + alpha_upper_hist * log(tempmin_fsim) - log(1 - (tempmin_fsim / tempmax)^alpha_upper_hist)
+      int_lower_hist <- log(alpha_lower_hist) + alpha_lower_hist * log(tempmin_fsim) - log(1 - (tempmin_fsim / tempmax)^alpha_lower_hist)
       int_fsim <- log(fsim_shape) + fsim_shape * log(tempmin_fsim) - log(1 - (tempmin_fsim / tempmax)^fsim_shape)
       
       
@@ -359,9 +356,9 @@ for(curpyrome in 1:npyromes)
       plot(lx,ly)
       
       
-      abline(a = int_mean, b = slope_fit_mean, col = "blue")
-      abline(a = int_upper, b = slope_fit_upper, col = "blue", lty = 2)
-      abline(a = int_lower, b = slope_fit_lower, col = "blue", lty = 2)
+      abline(a = int_mean_hist, b = slope_fit_mean, col = "blue")
+      abline(a = int_upper_hist, b = slope_fit_upper, col = "blue", lty = 2)
+      abline(a = int_lower_hist, b = slope_fit_lower, col = "blue", lty = 2)
       abline(a = int_fsim, b = fsim_slope, col ="red", lty = 2)
       dev.off()
       ##Kendalls tau fit
