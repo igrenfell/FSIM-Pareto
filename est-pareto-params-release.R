@@ -52,7 +52,6 @@ tauslp <- function(x,y) {
   rat <- c(outer(y,y,"-")/outer(x,x,"-"))
   ratv <- rat[!is.na(rat)]
   slp <- median(ratv)
-  11
   res <- y - slp * x
   aint <- median(res)
   res <- res - aint
@@ -408,4 +407,5 @@ points(ci_mat_hist[,2], ci_mat_sim[,2], col = "red")
 outmat <- cbind(ci_mat_hist, ci_mat_sim)
 names(outmat) <- c("Hist-L", "Hist-U", "Sim-L", "Sim_U")
 write.table(outmat, "CI-Hist-Sim.csv")
+
 
