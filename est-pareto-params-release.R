@@ -289,34 +289,57 @@ for(curpyrome in 1:npyromes)
       my <- mean(ly)
       
       #fname <- paste(cwd, fname, sep = "/")
-      fsim_acres <- read_excel(fname, sheet = 2)
-      fsim_acres <- data.frame(fsim_acres)
-      first_row <- fsim_acres[1,]
+      fsim_acre_df <- read_excel(fname, sheet = 2)
+      fsim_acre_df <- data.frame(fsim_acre_df)
+      first_row <- fsim_acre_df[1,]
       valid_vec <- as.logical(1-is.na(first_row))
       indvec <- 1:length(valid_vec)
       last_run <- max(indvec[valid_vec])
-      fsim_acres <- fsim_acres[,last_run]
-      fsim_acres <- na.exclude(fsim_acres)
-      fsim_shape <- bounded_powerlaw_mle(fsim_acres, tempmin_fsim, tempmax)
-      alpha_boot_hist <- rep(NA, nboot)
-      alpha_boot_sim <- rep(NA, nboot)
       
-      for (b in 1:nboot) {
-        histx <- sample(acres_gte18, replace = TRUE)
-        simx <- sample(fsim_acres, length(acres_gte18), replace = TRUE)
+      alpha_vec_mean <- numeric(last_run)
+      alpha_vec_se <- numeric(last_run)
+      
+      for(currun in 1:last_run)
+      {
+        fsim_acres <- fsim_acre_df[,currun]
+        fsim_acres <- na.exclude(fsim_acres)
+        fsim_shape <- bounded_powerlaw_mle(fsim_acres, tempmin_fsim, tempmax)
+        alpha_boot_hist <- rep(NA, nboot)
+        alpha_boot_sim <- rep(NA, nboot)
         
-        # fit MLE to simx
-        alpha_boot_hist[b] <- bounded_powerlaw_mle(histx, xmin = tempmin_fsim, xmax = tempmax)
-        alpha_boot_sim[b] <- bounded_powerlaw_mle(simx, xmin = tempmin_fsim, xmax = tempmax)
+        for (b in 1:nboot) {
+          histx <- sample(acres_gte18, replace = TRUE)
+          simx <- sample(fsim_acres, length(acres_gte18), replace = TRUE)
+          
+          # fit MLE to simx
+          alpha_boot_hist[b] <- bounded_powerlaw_mle(histx, xmin = tempmin_fsim, xmax = tempmax)
+          alpha_boot_sim[b] <- bounded_powerlaw_mle(simx, xmin = tempmin_fsim, xmax = tempmax)
+          
+        }
+        
+        
+        se_boot_hist <- sd(alpha_boot_hist, na.rm = TRUE)
+        se_boot_sim <- sd(alpha_boot_sim, na.rm = TRUE)
+        
+        mean_boot_hist <- mean(alpha_boot_hist)
+        mean_boot_sim <- mean(alpha_boot_sim)
+        
+        alpha_vec_mean[currun] <- mean_boot_sim
+        alpha_vec_se[currun] <- se_boot_sim
+        
         
       }
       
+      alpha_mean_out <- c(mean_boot_hist, alpha_vec_mean)
+      alpha_se_out <- c(se_boot_hist, alpha_vec_se)
       
-      se_boot_hist <- sd(alpha_boot_hist, na.rm = TRUE)
-      se_boot_sim <- sd(alpha_boot_sim, na.rm = TRUE)
+      outmat_alpha <- cbind(alpha_mean_out, alpha_se_out)
       
-      mean_boot_hist <- mean(alpha_boot_hist)
-      mean_boot_sim <- mean(alpha_boot_sim)
+      fout <- paste( "outmat_alpha_", curpyrome, ".txt", sep = "")
+      write.table(outmat_alpha, fout)
+      
+      
+      rownames(outmat_alpha) <- c("Hist", as.character(1:last_run))
       z_test <- (mean_boot_hist - mean_boot_sim) / (se_boot_hist**2 + se_boot_sim**2)
       
       alpha_upper_hist <- mean_boot_hist + 1.96*se_boot_hist
@@ -378,7 +401,6 @@ for(curpyrome in 1:npyromes)
   }
   
 }
-
 plot(nfiremat[,1], xlab=  "Year")
 plot(years_unique, shapelist[[128]], xlab  = "Year", ylab = "est-shape")
 
@@ -407,4 +429,5 @@ points(ci_mat_hist[,2], ci_mat_sim[,2], col = "red")
 outmat <- cbind(ci_mat_hist, ci_mat_sim)
 names(outmat) <- c("Hist-L", "Hist-U", "Sim-L", "Sim_U")
 write.table(outmat, "CI-Hist-Sim.csv")
+
 
