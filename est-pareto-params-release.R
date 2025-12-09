@@ -244,25 +244,27 @@ for(curpyrome in 1:npyromes)
     inc <- 1
     
     tempshape_vec <- rep(NA, length(years_unique))
-    
+        
     for(curyear in years_unique)
     {
       print(c(curpyrome, curyear))
       submat_year <- submat[yearvec == curyear,]
       submat_acres <- na.exclude(submat_year$FIRE_SIZE)
       ##Fixing all fires to 0.1 acres
-      submat_acres[submat_acres < tempmin] <- tempmin
-      
-      submat_gte18 <- submat_acres
-      submat_gte18 <- submat_gte18[submat_gte18 >= 18]
-      temp_shape <- bounded_powerlaw_mle(submat_gte18, tempmin_fsim, tempmax)
-      tempshape_vec[inc] <- temp_shape
-      # vgam_shape <- fitdist(submat_acres, "truncpareto",
-      #                       start = list(lower=tempmin,
-      #                                    upper=tempmax,
-      #                                    shape=1.0))
-      nfiremat[curpyrome, inc] <-dim(submat_year)[1]
-      
+      if(sum(submat_acres > 0))
+      {
+        submat_acres[submat_acres < tempmin] <- tempmin
+        
+        submat_gte18 <- submat_acres
+        submat_gte18 <- submat_gte18[submat_gte18 >= 18]
+        temp_shape <- bounded_powerlaw_mle(submat_gte18, tempmin_fsim, tempmax)
+        tempshape_vec[inc] <- temp_shape
+        # vgam_shape <- fitdist(submat_acres, "truncpareto",
+        #                       start = list(lower=tempmin,
+        #                                    upper=tempmax,
+        #                                    shape=1.0))
+        nfiremat[curpyrome, inc] <-dim(submat_year)[1]
+      }
       inc <- inc + 1
     }
     
@@ -429,5 +431,6 @@ points(ci_mat_hist[,2], ci_mat_sim[,2], col = "red")
 outmat <- cbind(ci_mat_hist, ci_mat_sim)
 names(outmat) <- c("Hist-L", "Hist-U", "Sim-L", "Sim_U")
 write.table(outmat, "CI-Hist-Sim.csv")
+
 
 
