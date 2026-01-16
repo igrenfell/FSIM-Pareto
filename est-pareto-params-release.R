@@ -208,6 +208,15 @@ nboot <- 1000
 ci_list_hist <- vector("list", npyromes)
 ci_list_sim <- vector("list", npyromes)
 
+###Using minimum fire sizes by pyrome
+fsim_minvec <- NA
+
+if(file.exists("fsim-min.txt"))
+{
+  fsim_minvec <- read.table("fsim-min.txt")
+  
+}
+
 for(curpyrome in 1:npyromes)
 {
   
@@ -241,6 +250,11 @@ for(curpyrome in 1:npyromes)
     tempmax <- burn_acres_row$burnable_ac
     tempmin <- 0.1
     tempmin_fsim <- 18
+    if(!is.na(fsim_minvec))
+    {
+      tempmin_fim <- fsim_minvec[curpyrome]
+      
+    }
     inc <- 1
     
     tempshape_vec <- rep(NA, length(years_unique))
@@ -256,7 +270,7 @@ for(curpyrome in 1:npyromes)
         submat_acres[submat_acres < tempmin] <- tempmin
         
         submat_gte18 <- submat_acres
-        submat_gte18 <- submat_gte18[submat_gte18 >= 18]
+        submat_gte18 <- submat_gte18[submat_gte18 >= tempmin_fsim]
         temp_shape <- bounded_powerlaw_mle(submat_gte18, tempmin_fsim, tempmax)
         tempshape_vec[inc] <- temp_shape
         # vgam_shape <- fitdist(submat_acres, "truncpareto",
