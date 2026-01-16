@@ -244,7 +244,7 @@ for(curpyrome in 1:npyromes)
     inc <- 1
     
     tempshape_vec <- rep(NA, length(years_unique))
-        
+    
     for(curyear in years_unique)
     {
       print(c(curpyrome, curyear))
@@ -273,6 +273,7 @@ for(curpyrome in 1:npyromes)
     ###Get shape parameter from FSIM output
     acres_hist <- submat$FIRE_SIZE
     acres_gte18 <- acres_hist[acres_hist >= 18]
+    namevec <- "Hist"
     if(length(acres_gte18) > 30)
     {
       breaks <- 10^seq(log10(18), log10(tempmax), length.out = 30)
@@ -300,6 +301,8 @@ for(curpyrome in 1:npyromes)
       
       alpha_vec_mean <- numeric(last_run)
       alpha_vec_se <- numeric(last_run)
+      
+      namevec <- c(namevec, names(first_row)[valid_vec])
       
       for(currun in 1:last_run)
       {
@@ -336,7 +339,7 @@ for(curpyrome in 1:npyromes)
       alpha_se_out <- c(se_boot_hist, alpha_vec_se)
       
       outmat_alpha <- cbind(alpha_mean_out, alpha_se_out)
-      
+      rownames(outmat_alpha) <- namevec
       fout <- paste( "outmat_alpha_", curpyrome, ".txt", sep = "")
       write.table(outmat_alpha, fout)
       
@@ -403,6 +406,7 @@ for(curpyrome in 1:npyromes)
   }
   
 }
+
 plot(nfiremat[,1], xlab=  "Year")
 plot(years_unique, shapelist[[128]], xlab  = "Year", ylab = "est-shape")
 
@@ -431,6 +435,4 @@ points(ci_mat_hist[,2], ci_mat_sim[,2], col = "red")
 outmat <- cbind(ci_mat_hist, ci_mat_sim)
 names(outmat) <- c("Hist-L", "Hist-U", "Sim-L", "Sim_U")
 write.table(outmat, "CI-Hist-Sim.csv")
-
-
 
